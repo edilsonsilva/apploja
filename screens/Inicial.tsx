@@ -29,7 +29,7 @@ function Produtos({ navigation }) {
   //Executar a consulta listartelainicial
 
   React.useEffect(() => {
-    fetch("http://192.168.0.8/projeto/service/produto/listartelainicial.php")
+    fetch("http://192.168.0.3/projeto/service/produto/listartelainicial.php")
       .then((response) => response.json())
       .then((produtos) => setDados(produtos.saida))
       .catch((error) => console.error(error))
@@ -53,7 +53,7 @@ function Produtos({ navigation }) {
               <View>
                 <Image
                   source={{
-                    uri: `http://192.168.0.8/projeto/img/${item.foto}`,
+                    uri: `http://192.168.0.3/projeto/img/${item.foto}`,
                   }}
                   style={tela.img}
                 />

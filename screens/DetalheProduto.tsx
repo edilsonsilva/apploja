@@ -12,7 +12,7 @@ export default function DetalheProduto({ route }) {
 
   React.useEffect(() => {
     fetch(
-      `http://192.168.0.8/projeto/service/produto/detalheproduto.php?idproduto=${idproduto}`
+      `http://192.168.0.3/projeto/service/produto/detalheproduto.php?idproduto=${idproduto}`
     )
       .then((response) => response.json())
       .then((produto) => setDados(produto.saida))
@@ -32,19 +32,19 @@ export default function DetalheProduto({ route }) {
           renderItem={({ item }) => (
             <View>
               <Image
-                source={{ uri: `http://192.168.0.8/projeto/img/${item.foto1}` }}
+                source={{ uri: `http://192.168.0.3/projeto/img/${item.foto1}` }}
                 style={tela.img}
               />
               <Image
-                source={{ uri: `http://192.168.0.8/projeto/img/${item.foto2}` }}
+                source={{ uri: `http://192.168.0.3/projeto/img/${item.foto2}` }}
                 style={tela.img}
               />
               <Image
-                source={{ uri: `http://192.168.0.8/projeto/img/${item.foto3}` }}
+                source={{ uri: `http://192.168.0.3/projeto/img/${item.foto3}` }}
                 style={tela.img}
               />
               <Image
-                source={{ uri: `http://192.168.0.8/projeto/img/${item.foto4}` }}
+                source={{ uri: `http://192.168.0.3/projeto/img/${item.foto4}` }}
                 style={tela.img}
               />
               <Text>{item.nomeproduto}</Text>

@@ -13,12 +13,13 @@ let ds = "";
 let vl = "";
 let qp = 0;
 let vp = "";
+let total = "";
 
-export default function Pagamento() {
+export default function Pagamento({ navigation }) {
   const [tipo, setTipo] = React.useState("");
   const [parcelas, setParcelas] = React.useState(1);
   const [idcliente, setIdCliente] = React.useState(0);
-
+  const [produtos, setProdutos] = React.useState([]);
   // constantes de passagem de dados
 
   const [descricao, setDescricao] = React.useState("");
@@ -31,11 +32,27 @@ export default function Pagamento() {
         "select idcliente from perfil",
         [],
         (_, { rows: { _array } }) => {
-          setIdCliente(_array);
+          setIdCliente(_array[0].idcliente.toString());
+          console.log(_array);
+        }
+      );
+
+      tx.executeSql("select * from itens", [], (_, { rows: { _array } }) => {
+        setProdutos(_array);
+        console.log(_array);
+      });
+
+      //Vamos fazer uma nova consulta para calcular o valor total dos produtos no carrinho
+      tx.executeSql(
+        "select sum(preco) as total from itens",
+        [],
+        (_, { rows: { _array } }) => {
+          setValor(_array[0].total.toString());
+          console.log(_array[0].total.toString());
         }
       );
     });
-  });
+  }, []);
 
   return (
     <View>
@@ -46,13 +63,26 @@ export default function Pagamento() {
         <Picker.Item label="Débito" value="Débito" />
       </Picker>
 
-      <TextInput placeholder="Detalhes do pagamento" />
-      <TextInput keyboardType="decimal-pad" placeholder="R$ 00" />
-
+      <TextInput
+        placeholder="Descrição do pagamento"
+        value={descricao}
+        onChangeText={(value) => setDescricao(value)}
+      />
+      <Text>Valor da Compra:</Text>
+      <TextInput
+        keyboardType="decimal-pad"
+        placeholder="R$ 00"
+        value={valor}
+        onChangeText={(value) => setValor(value)}
+      />
+      <Text>Selecione as parcelas</Text>
       <Picker
         selectedValue={parcelas}
         mode="dropdown"
-        onValueChange={setParcelas}
+        onValueChange={(parcelas) => {
+          setParcelas(parcelas);
+          setVParcelas((parseFloat(valor) / parcelas).toString());
+        }}
       >
         <Picker.Item label="1" value="1" />
         <Picker.Item label="2" value="2" />
@@ -65,8 +95,13 @@ export default function Pagamento() {
         <Picker.Item label="9" value="9" />
         <Picker.Item label="10" value="10" />
       </Picker>
-
-      <TextInput keyboardType="decimal-pad" placeholder="R$ 00" />
+      <Text>Valor da Parcela</Text>
+      <TextInput
+        keyboardType="decimal-pad"
+        placeholder="R$ 00"
+        value={vParcela}
+        onChangeText={(value) => setVParcelas(value)}
+      />
 
       <TouchableOpacity
         onPress={() => {
@@ -78,6 +113,8 @@ export default function Pagamento() {
           qp = parcelas;
           vp = vParcela;
           efetuarPagamento();
+
+          navigation.navigate("ConfirmacaoPagamento");
         }}
       >
         <Text>Pagar</Text>
@@ -86,7 +123,7 @@ export default function Pagamento() {
   );
 }
 function efetuarPagamento() {
-  fetch("http://192.168.0.8/projeto/service/pagamento/cadastro.php", {
+  fetch("http://192.168.0.3/projeto/service/pagamento/cadastro.php", {
     method: "POST",
     headers: {
       Accept: "application/json",
@@ -97,14 +134,22 @@ function efetuarPagamento() {
       tipo: tp,
       descricao: ds,
       valor: vl,
-      quantidadeparcelas: qp,
+      parcelas: qp,
       valorparcela: vp,
     }),
   })
     .then((response) => response.json())
     .then((resposta) => {
       console.log(resposta);
-      alert("Olhe na tela de console");
+      alert("Seu pagamento foi efetuado");
     })
     .catch((error) => console.error(error));
+
+  limparCarrinho();
+}
+
+function limparCarrinho() {
+  db.transaction((tx) => {
+    tx.executeSql("delete from itens");
+  });
 }
